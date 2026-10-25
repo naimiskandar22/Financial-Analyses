@@ -36,4 +36,4 @@ jobs:
           CSV_PATH: ${{ inputs.csv_path }}
           COLLECTION_NAME: ${{ inputs.collection }}
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-        run: load_batch_historical_price.py
+        run: python load_batch_historical_price.py
