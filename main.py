@@ -107,6 +107,7 @@ def load_db_collection(db_path = "NVDA_prices"):
 
 def fetch_and_store_nvda(symbol = 'NVDA'):
     prices_ref = load_db_collection(db_path="NVDA_prices")
+    print('ref:', prices_ref)
 
     if prices_ref is None:
         df = LoadPricesFromYF(symbol, start_date=start_date)
@@ -114,6 +115,8 @@ def fetch_and_store_nvda(symbol = 'NVDA'):
         # Fetch the latest stored date from Firestore
         latest_docs = prices_ref.order_by("date", direction=firestore.Query.DESCENDING).limit(1).get()
         last_date = latest_docs[0].to_dict().get("date") if latest_docs else None
+        print('latest docs:', latest_docs)
+        print('last date:', last_date)
         df = LoadExistingFile(prices_ref, symbol)
 
     # Save new records only
