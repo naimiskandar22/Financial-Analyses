@@ -12,6 +12,7 @@ beautifulsoup4
 requests
 sqlalchemy
 psycopg2-binary
+firebase-admin
 pg8000
 google-cloud-secret-manager
 python-dateutil
