@@ -1,6 +1,6 @@
 numpy
 pandas
-pandas_ta
+pandas-ta==0.4.71b0
 matplotlib
 plotly
 yfinance
@@ -13,7 +13,6 @@ requests
 sqlalchemy
 psycopg2-binary
 pg8000
-cloud-sql-python-connector[pg8000]
 google-cloud-secret-manager
 python-dateutil
 TA-Lib
