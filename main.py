@@ -99,7 +99,6 @@ def LoadExistingFile(df, symbol):
 
 def load_db_collection(db_path = "NVDA_prices"):
     name = os.environ.get("COLLECTION_NAME", db_path)  # or wherever it comes from
-    print(repr(name))
     prices_ref = db.collection(name.strip().strip("/"))
     # prices_ref = db.collection(db_path)
 
@@ -107,17 +106,23 @@ def load_db_collection(db_path = "NVDA_prices"):
 
 def fetch_and_store_nvda(symbol = 'NVDA'):
     prices_ref = load_db_collection(db_path="NVDA_prices")
-    print('ref:', prices_ref)
+    # Fetch the latest stored date from Firestore
+    latest_docs = prices_ref.order_by("Date", direction=firestore.Query.DESCENDING).limit(1).get()
+    last_date = latest_docs[0].to_dict().get("Date") if latest_docs else None
 
-    if prices_ref is None:
+    if latest_docs == []:
+        # No existing documents in the collection
         df = LoadPricesFromYF(symbol, start_date=start_date)
     else:
-        # Fetch the latest stored date from Firestore
-        latest_docs = prices_ref.order_by("date", direction=firestore.Query.DESCENDING).limit(1).get()
-        last_date = latest_docs[0].to_dict().get("date") if latest_docs else None
-        print('latest docs:', latest_docs)
-        print('last date:', last_date)
-        df = LoadExistingFile(prices_ref, symbol)
+        # Load all existing documents and convert to a dataframe
+        rows = []
+        for doc in prices_ref.stream():
+            data = doc.to_dict()
+            data["id"] = doc.id          # keep the document ID (e.g. the date)
+            rows.append(data)
+
+        df = pd.DataFrame(rows)
+        df = LoadExistingFile(df, symbol)
 
     # Save new records only
     saved = 0
@@ -130,13 +135,13 @@ def fetch_and_store_nvda(symbol = 'NVDA'):
             continue  
 
         data = {
-            "symbol": "NVDA",
-            "date": date_str,
-            "open": float(row["Open"]),
-            "high": float(row["High"]),
-            "low": float(row["Low"]),
-            "close": float(row["Close"]),
-            "volume": int(row["Volume"])
+            "Symbol": "NVDA",
+            "Date": date_str,
+            "Open": float(row["Open"]),
+            "High": float(row["High"]),
+            "Low": float(row["Low"]),
+            "Close": float(row["Close"]),
+            "Volume": int(row["Volume"])
         }
         prices_ref.document(date_str).set(data)
         saved += 1
