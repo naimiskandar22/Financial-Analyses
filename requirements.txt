@@ -1,7 +1,6 @@
 numpy
 pandas
 pandas_ta
-TA-Lib
 matplotlib
 plotly
 yfinance
@@ -17,3 +16,4 @@ pg8000
 cloud-sql-python-connector[pg8000]
 google-cloud-secret-manager
 python-dateutil
+TA-Lib
