@@ -14,7 +14,8 @@ col = db.collection("NVDA_prices")
 df = pd.read_csv("NVDA_prices.csv", parse_dates=["Date"])
 
 # Firestore-friendly values: dates as strings, NaN → None
-df["Date"] = df["Date"].dt.strftime("%Y-%m-%d")
+# df["Date"] = df["Date"].dt.strftime("%Y-%m-%d")
+df['Date'] = pd.to_datetime(df['Date'], utc=True)
 df = df.astype(object).where(df.notna(), None)
 
 records = df.to_dict("records")
