@@ -23,6 +23,7 @@ records = df.to_dict("records")
 for start in range(0, len(records), 500):
     batch = db.batch()
     for row in records[start:start + 500]:
-        batch.set(col.document(row["Date"]), row)
+        date_str = row['Date'].strftime("%Y-%m-%d")
+        batch.set(col.document(date_str), row)
     batch.commit()
     print(f"Committed rows {start}–{start + len(records[start:start + 500]) - 1}")
