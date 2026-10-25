@@ -34,6 +34,12 @@ def LoadPricesFromYF(symbol, start_date):
     stock_df['Close'] = stock_prices['Close']
     stock_df['Adj Close'] = stock_prices['Adj Close']
     stock_df['Volume'] = stock_prices['Volume']
+
+    stock_df['Idx'] = np.repeat(a=[0], repeats=len(stock_df))  
+    stock_df['Date'] = pd.to_datetime(stock_df.index, utc=True)
+    stock_df['Year'] = stock_df['Date'].apply(lambda x: int(str.split(str(x), '-')[0]))
+    #Set the Idx to be the index
+    stock_df = stock_df.set_index(pd.Index(stock_df['Idx'].values))
     return stock_df
 
 def LoadExistingFile(df, symbol):
@@ -91,18 +97,24 @@ def LoadExistingFile(df, symbol):
 
     return stock_df
 
-def load_db_collection(db_path = "test_folder/NVDA_prices"):
-    prices_ref = db.collection(db_path)
+def load_db_collection(db_path = "NVDA_prices"):
+    name = os.environ.get("COLLECTION_NAME", db_path)  # or wherever it comes from
+    print(repr(name))
+    prices_ref = db.collection(name.strip().strip("/"))
+    # prices_ref = db.collection(db_path)
 
     return prices_ref
 
 def fetch_and_store_nvda(symbol = 'NVDA'):
-    prices_ref = load_db_collection(db_path="test_folder/NVDA_prices")
+    prices_ref = load_db_collection(db_path="NVDA_prices")
 
-    # 1. Fetch the latest stored date from Firestore
-    latest_docs = prices_ref.order_by("date", direction=firestore.Query.DESCENDING).limit(1).get()
-    last_date = latest_docs[0].to_dict().get("date") if latest_docs else None
-    df = LoadExistingFile(prices_ref, symbol)
+    if prices_ref is None:
+        df = LoadPricesFromYF(symbol, start_date=start_date)
+    else:
+        # Fetch the latest stored date from Firestore
+        latest_docs = prices_ref.order_by("date", direction=firestore.Query.DESCENDING).limit(1).get()
+        last_date = latest_docs[0].to_dict().get("date") if latest_docs else None
+        df = LoadExistingFile(prices_ref, symbol)
 
     # Save new records only
     saved = 0
