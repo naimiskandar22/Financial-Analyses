@@ -8,7 +8,6 @@ import json
 from datetime import date, datetime, timedelta
 from datetime import timezone
 from dateutil.relativedelta import relativedelta
-import yfinance as yf
 
 import firebase_admin
 from firebase_admin import credentials, firestore
@@ -131,12 +130,12 @@ def fetch_and_store_nvda(symbol = 'NVDA'):
         date_str = row['Date'].strftime("%Y-%m-%d")
         
         # Skip writing the start date if it's already in Firestore
-        if last_date and date_str <= last_date:
+        if last_date and date_str <= last_date.strftime("%Y-%m-%d"):
             continue  
 
         data = {
             "Symbol": "NVDA",
-            "Date": date_str,
+            "Date": row["Date"],
             "Open": float(row["Open"]),
             "High": float(row["High"]),
             "Low": float(row["Low"]),
