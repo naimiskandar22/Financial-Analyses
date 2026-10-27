@@ -2,6 +2,7 @@
 import numpy as np
 import pandas as pd
 import os
+import json
 # Load financial analysis functions
 import support_resistance_levels.detect_sr_levels as sr_levels
 import triangle_patterns.detect_triangle_patterns as tri_patterns
@@ -9,10 +10,10 @@ import triangle_patterns.detect_triangle_patterns as tri_patterns
 import firebase_admin
 from firebase_admin import credentials, firestore
 
-# Initialize using your local service account JSON key file
-cred = credentials.Certificate("serviceAccountKey.json")
+# Init Firebase
+firebase_creds = json.loads(os.getenv("FIREBASE_SERVICE_ACCOUNT"))
+cred = credentials.Certificate(firebase_creds)
 firebase_admin.initialize_app(cred)
-# Get your Firestore client
 db = firestore.client()
 
 def get_db_collection_ref(collection_name = "COLLECTION_NAME", db_name = "DB_NAME"):
@@ -92,6 +93,6 @@ if __name__ == "__main__":
         prices_coll_ref.document(date_str).set(new_data)
         saved += 1
         
-    print(f"Stored {saved} new daily records.")
+    print(f"Stored {saved} new daily records, and updated {updated} records.")
 
     print(df)
