@@ -64,8 +64,8 @@ if __name__ == "__main__":
 
     # Store support and resistance levels in Firestore collection
     # Update existing rows/Save new records
-    saved = df[df['Date'] > last_date]
-    updated = df[df['Date'] <= last_date]
+    saved = len(df[df['Date'] > last_date])
+    updated = len(df[df['Date'] <= last_date])
     # for timestamp, row in df.iterrows():
     #     # date_str = timestamp.strftime("%Y-%m-%d")
     #     date_str = row['Date'].strftime("%Y-%m-%d")
