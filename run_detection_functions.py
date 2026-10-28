@@ -64,34 +64,39 @@ if __name__ == "__main__":
 
     # Store support and resistance levels in Firestore collection
     # Update existing rows/Save new records
-    saved = 0
-    updated = 0
-    for timestamp, row in df.iterrows():
-        # date_str = timestamp.strftime("%Y-%m-%d")
-        date_str = row['Date'].strftime("%Y-%m-%d")
+    saved = df[df['Date'] > last_date]
+    updated = df[df['Date'] <= last_date]
+    # for timestamp, row in df.iterrows():
+    #     # date_str = timestamp.strftime("%Y-%m-%d")
+    #     date_str = row['Date'].strftime("%Y-%m-%d")
         
-        # If it's already in Firestore, update the support & resistance values
-        if last_date and date_str <= last_date.strftime("%Y-%m-%d"):
-            UpdateRow(date_str, "NVDA_prices", new_data={"Symbol": "NVDA"})
-            UpdateRow(date_str, "NVDA_prices", new_data={"Support_Level": row['Current_Support']})
-            UpdateRow(date_str, "NVDA_prices", new_data={"Resistance_Level": row['Current_Resistance']})
-            updated += 1
-            continue  
+    #     # If it's already in Firestore, update the support & resistance values
+    #     if last_date and date_str <= last_date.strftime("%Y-%m-%d"):
+    #         UpdateRow(date_str, "NVDA_prices", new_data={"Symbol": "NVDA"})
+    #         UpdateRow(date_str, "NVDA_prices", new_data={"Support_Level": row['Current_Support']})
+    #         UpdateRow(date_str, "NVDA_prices", new_data={"Resistance_Level": row['Current_Resistance']})
+    #         updated += 1
+    #         continue  
 
-        new_data = {
-            "Symbol": "NVDA",
-            "Date": row["Date"],
-            "Open": float(row["Open"]),
-            "High": float(row["High"]),
-            "Low": float(row["Low"]),
-            "Close": float(row["Close"]),
-            "Volume": int(row["Volume"]),
-            "Support_Level": float(new_data["Current_Support"]),
-            "Resistance_Level": float(new_data["Current_Resistance"])
-        }
-        AddNewRow()
-        prices_coll_ref.document(date_str).set(new_data)
-        saved += 1
+    #     new_data = {
+    #         "Symbol": "NVDA",
+    #         "Date": row["Date"],
+    #         "Open": float(row["Open"]),
+    #         "High": float(row["High"]),
+    #         "Low": float(row["Low"]),
+    #         "Close": float(row["Close"]),
+    #         "Volume": int(row["Volume"]),
+    #         "Support_Level": float(new_data["Current_Support"]),
+    #         "Resistance_Level": float(new_data["Current_Resistance"])
+    #     }
+    #     prices_coll_ref.document(date_str).set(new_data)
+    #     saved += 1
+    for start in range(0, len(df), 500):
+        batch = db.batch()
+        for row in df.iloc[start:start + 500]:
+            date_str = row['Date'].strftime("%Y-%m-%d")
+            batch.set(prices_coll_ref.document(date_str), row)
+        batch.commit()
         
     print(f"Stored {saved} new daily records, and updated {updated} records.")
 
