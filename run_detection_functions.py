@@ -93,7 +93,7 @@ if __name__ == "__main__":
     #     saved += 1
     for start in range(0, len(df), 500):
         batch = db.batch()
-        for row in df.iloc[start:start + 500]:
+        for row in df.loc[start:start + 500]:
             date_str = row['Date'].strftime("%Y-%m-%d")
             batch.set(prices_coll_ref.document(date_str), row)
         batch.commit()
